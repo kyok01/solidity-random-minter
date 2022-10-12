@@ -6,4 +6,5 @@ interface IRandomMinter {
     function randomMint(uint256 amount) external;
     function addFunc(uint256 a) pure external returns(uint256);
     function getRandomNum() view external returns(uint256);
+    event Mint(address sender, uint256 amount);
 }

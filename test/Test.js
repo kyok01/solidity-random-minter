@@ -5,10 +5,10 @@ const { ethers } = require("hardhat");
 describe("random-minter", function () {
   async function deployTokenFixture() {
     // ArchiveCoin Contract
-    const ARCV = await ethers.getContractFactory("RandomMinter");
+    const RM = await ethers.getContractFactory("RandomMinter");
     const [owner, addr1, addr2] = await ethers.getSigners();
 
-    const Contract = await ARCV.deploy(2);
+    const Contract = await RM.deploy(2);
 
     await Contract.deployed();
 
@@ -24,10 +24,17 @@ describe("random-minter", function () {
     ownerBalance = await Contract.balanceOf(owner.address);
     console.dir("owner=" + ownerBalance);
 
-    const result = await Contract.addFunc(5);
-    console.dir("result: " + result);
+    const calcResult = await Contract.addFunc(5);
+    console.dir("result: " + calcResult);
 
     const randomNum = await Contract.getRandomNum();
     console.dir("randomNum: " + randomNum);
+
+    await Contract.connect(addr1).randomMint(5);
+    let addr1Balance = await Contract.balanceOf(addr1.address);
+    console.dir("owner=" + addr1Balance);
+
+    const randomResult = await Contract.getRandomResult(0);
+    console.dir("randomResult: " + randomResult);
   });
 });
