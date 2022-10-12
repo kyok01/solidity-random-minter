@@ -4,16 +4,20 @@ const { ethers } = require("hardhat");
 
 describe("random-minter", function () {
   async function deployTokenFixture() {
-    // ArchiveCoin Contract
-    const RM = await ethers.getContractFactory("RandomMinter");
     const [owner, addr1, addr2] = await ethers.getSigners();
 
+    // RandomMinter Contract
+    const RM = await ethers.getContractFactory("RandomMinter");
     const Contract = await RM.deploy(2);
-
     await Contract.deployed();
 
+    // RandomMinter Contract
+    const CWI = await ethers.getContractFactory("CallWithInterface");
+    const Contract2 = await CWI.deploy();
+    await Contract2.deployed();
+
     // Fixtures can return anything you consider useful for your tests
-    return { Contract, owner, addr1, addr2 };
+    return { Contract, Contract2, owner, addr1, addr2 };
   }
   it("Mint", async function () {
     const { Contract, owner, addr1, addr2 } = await loadFixture(
@@ -36,5 +40,18 @@ describe("random-minter", function () {
 
     const randomResult = await Contract.getRandomResult(0);
     console.dir("randomResult: " + randomResult);
+  });
+
+  it("external function calls", async function () {
+    const { Contract, Contract2} = await loadFixture(
+      deployTokenFixture
+    );
+
+    await Contract2.callExternalFunction(Contract.address, 3);
+
+    const randomResult = await Contract.getRandomResult(0);
+
+    // msg.sender is not owner.
+    expect(randomResult.sender).to.equal(Contract2.address);
   });
 });
