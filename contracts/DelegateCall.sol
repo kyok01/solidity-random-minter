@@ -23,7 +23,6 @@ contract A {
     function setVars(address _contract, uint _num)
         public
         payable
-        returns (uint256)
     {
         // A's storage is set, B is not modified.
         (bool success, bytes memory data) = _contract.delegatecall(
@@ -31,19 +30,15 @@ contract A {
         );
 
         // If the function call succeeded
-        // if (success) {
-        //     // We know that "myFunction" returns an
-        //     // uint256 so we decode it and return it.
-        //     return abi.decode(data, (uint256));
-        // } else {
-        //     // If function did not succeed then revert with
-        //     // error message if there is one.
-        //     if (data.length > 0) {
-        //         // bubble up the error
-        //         revert(string(data));
-        //     } else {
-        //         revert("myFunction had an error");
-        //     }
-        // }
+        if (!success) {
+            // If function did not succeed then revert with
+            // error message if there is one.
+            if (data.length > 0) {
+                // bubble up the error
+                revert(string(data));
+            } else {
+                revert("myFunction had an error");
+            }
+        }
     }
 }

@@ -26,8 +26,13 @@ describe("random-minter", function () {
     const Contract4 = await B.deploy();
     await Contract4.deployed();
 
+    // DelegateCall Contract
+    const DC = await ethers.getContractFactory("DelegateCall");
+    const Contract5 = await DC.deploy(2);
+    await Contract5.deployed();
+
     // Fixtures can return anything you consider useful for your tests
-    return { Contract, Contract2, Contract3, Contract4,owner, addr1, addr2 };
+    return { Contract, Contract2, Contract3, Contract4,Contract5,owner, addr1, addr2 };
   }
   it("Mint", async function () {
     const { Contract, owner, addr1 } = await loadFixture(deployTokenFixture);
@@ -62,12 +67,23 @@ describe("random-minter", function () {
   });
 
   it("delegateCall", async function () {
-    const { Contract, Contract3, Contract4,addr1 } = await loadFixture(
+    const { Contract3, Contract4,addr1 } = await loadFixture(
       deployTokenFixture
     );
     await Contract3.setVars(Contract4.address, 3);
 
     const randomResult = await Contract3.num();
+    console.log(randomResult.toNumber());
+  });
+
+  it("delegateCall2", async function () {
+    const { Contract, Contract5, owner} = await loadFixture(
+      deployTokenFixture
+    );
+    await Contract5.randomMint(Contract.address, 3);
+
+    const randomResult = await Contract5.getRandomResult(0);
     console.log(randomResult);
+    expect(randomResult.sender).to.equal(owner.address);
   });
 });
