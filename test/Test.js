@@ -11,18 +11,26 @@ describe("random-minter", function () {
     const Contract = await RM.deploy(2);
     await Contract.deployed();
 
-    // RandomMinter Contract
+    // CallWithInterface Contract
     const CWI = await ethers.getContractFactory("CallWithInterface");
     const Contract2 = await CWI.deploy();
     await Contract2.deployed();
 
+    // DelegateCall A Contract
+    const A = await ethers.getContractFactory("A");
+    const Contract3 = await A.deploy();
+    await Contract3.deployed();
+
+    // DelegateCall B Contract
+    const B = await ethers.getContractFactory("B");
+    const Contract4 = await B.deploy();
+    await Contract4.deployed();
+
     // Fixtures can return anything you consider useful for your tests
-    return { Contract, Contract2, owner, addr1, addr2 };
+    return { Contract, Contract2, Contract3, Contract4,owner, addr1, addr2 };
   }
   it("Mint", async function () {
-    const { Contract, owner, addr1, addr2 } = await loadFixture(
-      deployTokenFixture
-    );
+    const { Contract, owner, addr1 } = await loadFixture(deployTokenFixture);
 
     await Contract.mint(owner.address, 5);
     ownerBalance = await Contract.balanceOf(owner.address);
@@ -43,9 +51,7 @@ describe("random-minter", function () {
   });
 
   it("external function calls", async function () {
-    const { Contract, Contract2} = await loadFixture(
-      deployTokenFixture
-    );
+    const { Contract, Contract2 } = await loadFixture(deployTokenFixture);
 
     await Contract2.callExternalFunction(Contract.address, 3);
 
@@ -53,5 +59,15 @@ describe("random-minter", function () {
 
     // msg.sender is not owner.
     expect(randomResult.sender).to.equal(Contract2.address);
+  });
+
+  it("delegateCall", async function () {
+    const { Contract, Contract3, Contract4,addr1 } = await loadFixture(
+      deployTokenFixture
+    );
+    await Contract3.setVars(Contract4.address, 3);
+
+    const randomResult = await Contract3.num();
+    console.log(randomResult);
   });
 });
